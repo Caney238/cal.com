@@ -220,7 +220,8 @@ function BookingListItem(booking: BookingItemProps) {
       },
     });
   };
-  const showRecordingsButtons = booking.location === "integrations:daily" && isPast && isConfirmed;
+  const showRecordingsButtons =
+    (booking.location === "integrations:daily" || booking?.location?.trim() === "") && isPast && isConfirmed;
   return (
     <>
       <RescheduleDialog
@@ -273,7 +274,7 @@ function BookingListItem(booking: BookingItemProps) {
         </DialogContent>
       </Dialog>
 
-      <tr className="group flex flex-col hover:bg-neutral-50 sm:flex-row">
+      <tr className="group flex flex-col hover:bg-gray-50 sm:flex-row">
         <td
           className="hidden align-top ltr:pl-6 rtl:pr-6 sm:table-cell sm:min-w-[12rem]"
           onClick={onClickTableData}>
@@ -356,14 +357,14 @@ function BookingListItem(booking: BookingItemProps) {
             <div
               title={booking.title}
               className={classNames(
-                "max-w-10/12 sm:max-w-56 text-sm font-medium leading-6 text-neutral-900 md:max-w-full",
+                "max-w-10/12 sm:max-w-56 text-sm font-medium leading-6 text-gray-900 md:max-w-full",
                 isCancelled ? "line-through" : ""
               )}>
               {booking.title}
               <span> </span>
 
               {!!booking?.eventType?.price && !booking.paid && (
-                <Badge className="hidden ltr:ml-2 rtl:mr-2 sm:inline-flex" variant="orange">
+                <Badge className="hidden ltr:ml-2 ltr:mr-2 rtl:ml-2 sm:inline-flex" variant="orange">
                   {t("pending_payment")}
                 </Badge>
               )}

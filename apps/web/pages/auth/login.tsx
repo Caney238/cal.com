@@ -115,7 +115,13 @@ export default function Login({
         description={t("login")}
         showLogo
         heading={twoFactorRequired ? t("2fa_code") : t("welcome_back")}
-        footerText={twoFactorRequired ? TwoFactorFooter : LoginFooter}>
+        footerText={
+          twoFactorRequired
+            ? TwoFactorFooter
+            : process.env.NEXT_PUBLIC_DISABLE_SIGNUP !== "true"
+            ? LoginFooter
+            : null
+        }>
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} data-testid="login-form">
             <div>
@@ -132,11 +138,12 @@ export default function Login({
                   {...register("email")}
                 />
                 <div className="relative">
-                  <div className="absolute right-0 -top-[6px] z-10">
-                    <Link href="/auth/forgot-password">
-                      <a tabIndex={-1} className="text-sm font-medium text-gray-600">
-                        {t("forgot")}
-                      </a>
+                  <div className="absolute -top-[6px]  z-10 ltr:right-0 rtl:left-0">
+                    <Link
+                      href="/auth/forgot-password"
+                      tabIndex={-1}
+                      className="text-sm font-medium text-gray-600">
+                      {t("forgot")}
                     </Link>
                   </div>
                   <PasswordField

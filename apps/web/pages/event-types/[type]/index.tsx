@@ -3,7 +3,6 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PeriodType, SchedulingType } from "@prisma/client";
 import { GetServerSidePropsContext } from "next";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -15,6 +14,7 @@ import convertToNewDurationType from "@calcom/lib/convertToNewDurationType";
 import findDurationType from "@calcom/lib/findDurationType";
 import getEventTypeById from "@calcom/lib/getEventTypeById";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
+import { useTypedQuery } from "@calcom/lib/hooks/useTypedQuery";
 import { HttpError } from "@calcom/lib/http-error";
 import prisma from "@calcom/prisma";
 import { customInputSchema, EventTypeMetaDataSchema } from "@calcom/prisma/zod-utils";
@@ -64,7 +64,6 @@ export type FormValues = {
     phone?: string;
   }[];
   customInputs: CustomInputParsed[];
-  users: string[];
   schedule: number;
   periodType: PeriodType;
   periodDays: number;
@@ -85,6 +84,8 @@ export type FormValues = {
   };
   successRedirectUrl: string;
   bookingLimits?: BookingLimit;
+  hosts: { userId: number }[];
+  hostsFixed: { userId: number }[];
 };
 
 export type CustomInputParsed = typeof customInputSchema._output;
@@ -111,15 +112,15 @@ export type EventTypeSetupProps = RouterOutputs["viewer"]["eventTypes"]["get"];
 const EventTypePage = (props: EventTypeSetupProps) => {
   const { t } = useLocale();
   const utils = trpc.useContext();
-  const router = useRouter();
-  const { tabName } = querySchema.parse(router.query);
+  const {
+    data: { tabName },
+  } = useTypedQuery(querySchema);
 
   const { data: eventTypeApps } = trpc.viewer.apps.useQuery({
     extendsFeature: "EventType",
   });
 
   const { eventType, locationOptions, team, teamMembers, currentUserMembership } = props;
-
   const [animationParentRef] = useAutoAnimate<HTMLDivElement>();
 
   const updateMutation = trpc.viewer.eventTypes.update.useMutation({
@@ -185,6 +186,7 @@ const EventTypePage = (props: EventTypeSetupProps) => {
       description: eventType.description ?? undefined,
       schedule: eventType.schedule || undefined,
       bookingLimits: eventType.bookingLimits || undefined,
+      length: eventType.length,
       hidden: eventType.hidden,
       periodDates: {
         startDate: periodDates.startDate,
@@ -194,12 +196,17 @@ const EventTypePage = (props: EventTypeSetupProps) => {
       periodCountCalendarDays: eventType.periodCountCalendarDays ? "1" : "0",
       schedulingType: eventType.schedulingType,
       minimumBookingNotice: eventType.minimumBookingNotice,
-      minimumBookingNoticeInDurationType: convertToNewDurationType(
-        "minutes",
-        findDurationType(eventType.minimumBookingNotice),
-        eventType.minimumBookingNotice
-      ),
       metadata,
+      hosts: !!eventType.hosts?.length
+        ? eventType.hosts.filter((host) => !host.isFixed)
+        : eventType.users
+            .filter(() => eventType.schedulingType === SchedulingType.ROUND_ROBIN)
+            .map((user) => ({ userId: user.id })),
+      hostsFixed: !!eventType.hosts?.length
+        ? eventType.hosts.filter((host) => host.isFixed)
+        : eventType.users
+            .filter(() => eventType.schedulingType === SchedulingType.COLLECTIVE)
+            .map((user) => ({ userId: user.id })),
     },
     resolver: zodResolver(
       z
@@ -237,7 +244,7 @@ const EventTypePage = (props: EventTypeSetupProps) => {
       />
     ),
     availability: <AvailabilityTab isTeamEvent={!!team} />,
-    team: <EventTeamTab eventType={eventType} teamMembers={teamMembers} team={team} />,
+    team: <EventTeamTab teamMembers={teamMembers} team={team} />,
     limits: <EventLimitsTab eventType={eventType} />,
     advanced: <EventAdvancedTab eventType={eventType} team={team} />,
     recurring: <EventRecurringTab eventType={eventType} />,
@@ -278,6 +285,8 @@ const EventTypePage = (props: EventTypeSetupProps) => {
             locations,
             metadata,
             customInputs,
+            hosts: hostsInput,
+            hostsFixed,
             // We don't need to send send these values to the backend
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             seatsPerTimeSlotEnabled,
@@ -285,6 +294,11 @@ const EventTypePage = (props: EventTypeSetupProps) => {
             minimumBookingNoticeInDurationType,
             ...input
           } = values;
+
+          const hosts: (typeof hostsInput[number] & { isFixed?: boolean })[] = [];
+          if (hostsInput || hostsFixed) {
+            hosts.push(...hostsInput.concat(hostsFixed.map((host) => ({ isFixed: true, ...host }))));
+          }
 
           if (bookingLimits) {
             const isValid = validateBookingLimitOrder(bookingLimits);
@@ -303,6 +317,7 @@ const EventTypePage = (props: EventTypeSetupProps) => {
 
           updateMutation.mutate({
             ...input,
+            hosts,
             locations,
             recurringEvent,
             periodStartDate: periodDates.startDate,

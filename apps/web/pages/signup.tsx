@@ -8,8 +8,7 @@ import { isSAMLLoginEnabled } from "@calcom/features/ee/sso/lib/saml";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { collectPageParameters, telemetryEventTypes, useTelemetry } from "@calcom/lib/telemetry";
 import { inferSSRProps } from "@calcom/types/inferSSRProps";
-import { Alert, Button, EmailField, PasswordField, TextField } from "@calcom/ui";
-import { HeadSeo } from "@calcom/web/components/seo/head-seo";
+import { Alert, Button, EmailField, PasswordField, TextField, HeadSeo } from "@calcom/ui";
 import { asStringOrNull } from "@calcom/web/lib/asStringOrNull";
 import { WEBAPP_URL } from "@calcom/web/lib/config/constants";
 import prisma from "@calcom/web/lib/prisma";
@@ -93,7 +92,11 @@ export default function Signup({ prepopulateFormValues }: inferSSRProps<typeof g
                     {...register("username")}
                     required
                   />
-                  <EmailField {...register("email")} />
+                  <EmailField
+                    {...register("email")}
+                    disabled={prepopulateFormValues?.email}
+                    className="disabled:bg-gray-200 disabled:hover:cursor-not-allowed"
+                  />
                   <PasswordField
                     labelProps={{
                       className: "block text-sm font-medium text-gray-700",
@@ -145,6 +148,12 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     trpcState: ssr.dehydrate(),
     prepopulateFormValues: undefined,
   };
+
+  if (process.env.NEXT_PUBLIC_DISABLE_SIGNUP === "true") {
+    return {
+      notFound: true,
+    };
+  }
 
   // no token given, treat as a normal signup without verification token
   if (!token) {

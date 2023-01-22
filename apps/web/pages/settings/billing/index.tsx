@@ -3,11 +3,12 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { HelpScout, useChat } from "react-live-chat-loader";
 
+import { getLayout } from "@calcom/features/settings/layouts/SettingsLayout";
 import { classNames } from "@calcom/lib";
 import { WEBAPP_URL } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { trpc } from "@calcom/trpc/react";
-import { Button, getSettingsLayout as getLayout, Icon, Meta } from "@calcom/ui";
+import { Button, Icon, Meta } from "@calcom/ui";
 
 import { ssrInit } from "@server/lib/ssr";
 
@@ -28,7 +29,7 @@ const CtaRow = ({ title, description, className, children }: CtaRowProps) => {
         </div>
         <div className="flex-shrink-0 pt-3 sm:ml-auto sm:pt-0 sm:pl-3">{children}</div>
       </section>
-      <hr className="border-neutral-200" />
+      <hr className="border-gray-200" />
     </>
   );
 };

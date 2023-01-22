@@ -123,6 +123,7 @@ export const viewerTeamsRouter = router({
         logo: z.string().optional(),
         slug: z.string().optional(),
         hideBranding: z.boolean().optional(),
+        hideBookATeamMember: z.boolean().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -150,6 +151,7 @@ export const viewerTeamsRouter = router({
         logo: input.logo,
         bio: input.bio,
         hideBranding: input.hideBranding,
+        hideBookATeamMember: input.hideBookATeamMember,
       };
 
       if (
@@ -249,7 +251,7 @@ export const viewerTeamsRouter = router({
     .input(
       z.object({
         teamId: z.number(),
-        usernameOrEmail: z.string(),
+        usernameOrEmail: z.string().transform((usernameOrEmail) => usernameOrEmail.toLowerCase()),
         role: z.nativeEnum(MembershipRole),
         language: z.string(),
         sendEmailInvitation: z.boolean(),
@@ -319,7 +321,7 @@ export const viewerTeamsRouter = router({
             from: ctx.user.name,
             to: input.usernameOrEmail,
             teamName: team.name,
-            joinLink: `${WEBAPP_URL}/signup?token=${token}&callbackUrl=/settings/teams`,
+            joinLink: `${WEBAPP_URL}/signup?token=${token}&callbackUrl=/teams`,
           });
         }
       } else {
@@ -659,6 +661,7 @@ export const viewerTeamsRouter = router({
               user: {
                 id: ctx.user.id,
               },
+              accepted: true,
             },
           },
         },

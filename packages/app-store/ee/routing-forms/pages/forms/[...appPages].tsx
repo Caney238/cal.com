@@ -1,6 +1,7 @@
 // TODO: i18n
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
+import Shell, { ShellMain } from "@calcom/features/shell/Shell";
 import useApp from "@calcom/lib/hooks/useApp";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { trpc } from "@calcom/trpc/react";
@@ -13,8 +14,6 @@ import {
   Icon,
   List,
   ListLinkItem,
-  Shell,
-  ShellMain,
   Tooltip,
 } from "@calcom/ui";
 
@@ -37,7 +36,7 @@ export default function RoutingForms({
   function NewFormButton() {
     return (
       <FormAction
-        size="fab"
+        variant="fab"
         routingForm={null}
         data-testid="new-routing-form"
         StartIcon={Icon.FiPlus}
@@ -89,7 +88,7 @@ export default function RoutingForms({
                                   target="_blank"
                                   StartIcon={Icon.FiExternalLink}
                                   color="secondary"
-                                  size="icon"
+                                  variant="icon"
                                   disabled={disabled}
                                 />
                               </Tooltip>
@@ -97,7 +96,7 @@ export default function RoutingForms({
                                 routingForm={form}
                                 action="copyLink"
                                 color="secondary"
-                                size="icon"
+                                variant="icon"
                                 StartIcon={Icon.FiLink}
                                 disabled={disabled}
                                 tooltip={t("copy_link_to_form")}
@@ -145,7 +144,7 @@ export default function RoutingForms({
                                     {t("Copy Typeform Redirect Url")}
                                   </FormAction>
                                 ) : null}
-                                <DropdownMenuSeparator className="h-px bg-gray-200" />
+                                <DropdownMenuSeparator />
                                 <FormAction
                                   action="_delete"
                                   routingForm={form}
@@ -215,7 +214,10 @@ export const getServerSideProps = async function getServerSideProps(
     },
   });
 
-  const serializableForms = forms.map((form) => getSerializableForm(form));
+  const serializableForms = [];
+  for (const [, form] of Object.entries(forms)) {
+    serializableForms.push(await getSerializableForm(form));
+  }
 
   return {
     props: {

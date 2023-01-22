@@ -2,21 +2,21 @@ import { GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
 import { Controller, useForm } from "react-hook-form";
 
+import { getLayout } from "@calcom/features/settings/layouts/SettingsLayout";
 import { APP_NAME } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { trpc } from "@calcom/trpc/react";
 import {
-  Badge,
   Button,
   ColorPicker,
   Form,
-  getSettingsLayout as getLayout,
   Meta,
   showToast,
   SkeletonButton,
   SkeletonContainer,
   SkeletonText,
   Switch,
+  UpgradeTeamsBadge,
 } from "@calcom/ui";
 
 import { ssrInit } from "@server/lib/ssr";
@@ -49,6 +49,7 @@ const AppearanceView = () => {
   const session = useSession();
   const utils = trpc.useContext();
   const { data: user, isLoading } = trpc.viewer.me.useQuery();
+  const { data: dataHasTeamPlan, isLoading: isLoadingHasTeamPlan } = trpc.viewer.teams.hasTeamPlan.useQuery();
 
   const formMethods = useForm({
     defaultValues: {
@@ -73,7 +74,8 @@ const AppearanceView = () => {
     },
   });
 
-  if (isLoading) return <SkeletonLoader title={t("appearance")} description={t("appearance_description")} />;
+  if (isLoading || isLoadingHasTeamPlan)
+    return <SkeletonLoader title={t("appearance")} description={t("appearance_description")} />;
 
   if (!user) return null;
 
@@ -121,7 +123,7 @@ const AppearanceView = () => {
         />
       </div>
 
-      <hr className="border-1 my-8 border-neutral-200" />
+      <hr className="my-8 border border-gray-200" />
       <div className="mb-6 flex items-center text-sm">
         <div>
           <p className="font-semibold">{t("custom_brand_colors")}</p>
@@ -167,7 +169,7 @@ const AppearanceView = () => {
         onClick={() => window.open(`${WEBAPP_URL}/${user.username}/${user.eventTypes[0].title}`, "_blank")}>
         Preview
       </Button> */}
-      <hr className="border-1 my-8 border-neutral-200" />
+      <hr className="my-8 border border-gray-200" />
       <Controller
         name="hideBranding"
         control={formMethods.control}
@@ -177,19 +179,21 @@ const AppearanceView = () => {
             <div className="flex w-full text-sm">
               <div className="mr-1 flex-grow">
                 <div className="flex items-center">
-                  <p className="mr-2 font-semibold">{t("disable_cal_branding", { appName: APP_NAME })}</p>
-                  <Badge variant="gray">{t("pro")}</Badge>
+                  <p className="font-semibold ltr:mr-2 rtl:ml-2">
+                    {t("disable_cal_branding", { appName: APP_NAME })}
+                  </p>
+                  {!dataHasTeamPlan?.hasTeamPlan && <UpgradeTeamsBadge />}
                 </div>
                 <p className="mt-0.5  text-gray-600">{t("removes_cal_branding", { appName: APP_NAME })}</p>
               </div>
               <div className="flex-none">
                 <Switch
                   id="hideBranding"
-                  disabled={!session.data?.user.belongsToActiveTeam}
+                  disabled={!dataHasTeamPlan?.hasTeamPlan}
                   onCheckedChange={(checked) =>
                     formMethods.setValue("hideBranding", checked, { shouldDirty: true })
                   }
-                  checked={!session.data?.user.belongsToActiveTeam ? false : value}
+                  checked={!dataHasTeamPlan?.hasTeamPlan ? false : value}
                 />
               </div>
             </div>

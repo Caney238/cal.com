@@ -16,7 +16,7 @@ export function SchedulerHeading() {
         {startDate.format("MMM DD")}-{endDate.format("DD")}
         <span className="text-gray-500">,{startDate.format("YYYY")}</span>
       </h1>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 rtl:space-x-reverse">
         {/* TODO: Renable when we have daily/mobile support */}
         {/* <ToggleGroup
           options={[
@@ -30,7 +30,7 @@ export function SchedulerHeading() {
           {/* TODO: i18n label with correct view */}
           <Button
             StartIcon={Icon.FiChevronLeft}
-            size="icon"
+            variant="icon"
             color="secondary"
             aria-label="Previous Week"
             onClick={() => {
@@ -39,7 +39,7 @@ export function SchedulerHeading() {
           />
           <Button
             StartIcon={Icon.FiChevronRight}
-            size="icon"
+            variant="icon"
             color="secondary"
             aria-label="Next Week"
             onClick={() => {
