@@ -12,14 +12,13 @@ import {
   DialogClose,
   DialogContent,
   HorizontalTabs,
-  Icon,
-  InputLeading,
   Label,
   showToast,
   Switch,
   TextArea,
   TextField,
 } from "@calcom/ui";
+import { FiCode, FiTrello, FiSun, FiArrowLeft, FiChevronRight } from "@calcom/ui/components/icon";
 
 import ColorPicker from "@components/ui/colorpicker";
 import Select from "@components/ui/form/Select";
@@ -488,7 +487,7 @@ const tabs = [
   {
     name: "HTML",
     href: "embedTabName=embed-code",
-    icon: Icon.FiCode,
+    icon: FiCode,
     type: "code",
     Component: forwardRef<
       HTMLTextAreaElement | HTMLIFrameElement | null,
@@ -541,7 +540,7 @@ ${getEmbedTypeSpecificString({ embedFramework: "HTML", embedType, calLink, previ
   {
     name: "React",
     href: "embedTabName=embed-react",
-    icon: Icon.FiCode,
+    icon: FiCode,
     type: "code",
     Component: forwardRef<
       HTMLTextAreaElement | HTMLIFrameElement | null,
@@ -581,7 +580,7 @@ ${getEmbedTypeSpecificString({ embedFramework: "react", embedType, calLink, prev
   {
     name: "Preview",
     href: "embedTabName=embed-preview",
-    icon: Icon.FiTrello,
+    icon: FiTrello,
     type: "iframe",
     Component: forwardRef<
       HTMLIFrameElement | HTMLTextAreaElement | null,
@@ -617,7 +616,7 @@ Cal("init", {origin:"${WEBAPP_URL}"});
 const ThemeSelectControl = ({ children, ...props }: ControlProps<{ value: Theme; label: string }, false>) => {
   return (
     <components.Control {...props}>
-      <Icon.FiSun className="ml-2 h-4 w-4 text-gray-500" />
+      <FiSun className="ml-2 h-4 w-4 text-gray-500" />
       {children}
     </components.Control>
   );
@@ -815,7 +814,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
               onClick={() => {
                 removeQueryParams(router, ["embedType", "embedTabName"]);
               }}>
-              <Icon.FiArrowLeft className="mr-4 w-4" />
+              <FiArrowLeft className="mr-4 w-4" />
             </button>
             {embed.title}
           </h3>
@@ -835,7 +834,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                       ? "Floating Popup Customization"
                       : "Element Click Customization"}
                   </div>
-                  <Icon.FiChevronRight
+                  <FiChevronRight
                     className={`${
                       isEmbedCustomizationOpen ? "rotate-90 transform" : ""
                     } ml-auto h-5 w-5 text-gray-500`}
@@ -863,7 +862,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                             };
                           });
                         }}
-                        addOnLeading={<InputLeading>W</InputLeading>}
+                        addOnLeading={<>W</>}
                       />
                       <span className="p-2">×</span>
                       <TextField
@@ -883,7 +882,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                             };
                           });
                         }}
-                        addOnLeading={<InputLeading>H</InputLeading>}
+                        addOnLeading={<>H</>}
                       />
                     </div>
                   </div>
@@ -1002,7 +1001,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                 onOpenChange={() => setIsBookingCustomizationOpen((val) => !val)}>
                 <CollapsibleTrigger className="flex w-full" type="button">
                   <div className="text-base  font-medium text-gray-900">Cal Booking Customization</div>
-                  <Icon.FiChevronRight
+                  <FiChevronRight
                     className={`${
                       isBookingCustomizationOpen ? "rotate-90 transform" : ""
                     } ml-auto h-5 w-5 text-gray-500`}

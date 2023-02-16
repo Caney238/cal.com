@@ -3,14 +3,14 @@ import { Props } from "react-phone-number-input/react-hook-form";
 
 import { EventLocationType } from "@calcom/app-store/locations";
 
-import { Icon } from "../components/icon";
+import { FiMapPin } from "../components/icon";
 
 type BookingFormValues = {
   name: string;
   email: string;
   notes?: string;
   locationType?: EventLocationType["type"];
-  guests?: string[];
+  guests?: { email: string }[];
   address?: string;
   attendeeAddress?: string;
   phone?: string;
@@ -36,7 +36,7 @@ export type AddressInputProps<FormValues> = Props<
 function AddressInput<FormValues>({ bookingForm, name, className, ...rest }: AddressInputProps<FormValues>) {
   return (
     <div className="relative ">
-      <Icon.FiMapPin color="#D2D2D2" className="absolute top-1/2 left-0.5 ml-3 h-6 -translate-y-1/2" />
+      <FiMapPin color="#D2D2D2" className="absolute top-1/2 left-0.5 ml-3 h-6 -translate-y-1/2" />
       <input
         {...rest}
         {...bookingForm.register("attendeeAddress")}
